@@ -5,6 +5,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from time import time
 
+def filtraggio_filtro_1(rate, data):
+    T = 0.01
+    N = int(rate * T)  #numero di campioni
+    h = np.ones(N) / N   #porta discreta di durata T
+    y = np.convolve(data, h)  #convoluzione
+    return y
+
 def plot_waveform(rate, data):
     """
     Plot della waveform del segnale audio
