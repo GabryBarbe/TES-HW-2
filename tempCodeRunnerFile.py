@@ -1,0 +1,5 @@
+plt.plot(x, h)
+    plt.xlabel("Tempo [s]")
+    plt.ylabel("Ampiezza")
+    plt.title("Risposta del filtro passa basso causale")
+    plt.grid(True)

@@ -5,6 +5,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 from time import time
 
+def passa_basso_sinc(B, rate):
+    N = (4*rate)//B
+    T= N//2
+    t = np.arange(0, N)/rate
+    h = 2*B*np.sinc(2*B*(t-T/rate))
+    return h
+
+
+def filtraggio_filtro_sinc(rate, data):
+    h = passa_basso_sinc(1000, rate)
+    y = np.convolve(data, h, mode='same')
+    return y
+
+
 def plot_waveform(rate, data):
     """
     Plot della waveform del segnale audio
@@ -87,7 +101,7 @@ def calcolo_fft_libreria(segmenti, rate):
 
 def main():
     FILENAME = "bohemian_rhapsody.wav" # nome del file audio
-    M = 1 # durata in secondi di ogni sezione
+    M = 30 # durata in secondi di ogni sezione
 
     # rate è la frequenza di campionamento
     # data è una matrice di 2 colonne (perchè il file è stereo) e tante 
@@ -108,9 +122,13 @@ def main():
     #     sd.play(sezioni[i], rate)
     #     sd.wait()   
 
-    plot_waveform(rate, data)
+    #plot_waveform(rate, data)
     
     calcolo_fft_libreria(sezioni, rate)
+
+    passa_basso_sinc(1000, rate)
+    y = filtraggio_filtro_sinc(rate, data)
+    plot_fft(fft.fftfreq(len(y), d=1/rate) / 1000, np.abs(fft.fft(y)) / len(y), 1)
 
 
     return 0
