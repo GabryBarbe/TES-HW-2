@@ -19,6 +19,30 @@ def filtro1(rate, data):
     outrate, outdata = wav.read(file_output)
     plot_waveform(outrate, outdata)
 
+def sinc(t):
+    if (t == 0):
+        return 1
+    return (sin(pi*t))/(pi*t)
+
+def filtro3_tempo(t, B, r):
+    return 1-sinc((t-r)*2*B)
+
+def filtro3(rate, data):
+    nH = int(5E3)
+    h = []
+    B = 1E3
+    r = nH/(2*rate)
+    for i in range(nH):
+        h.append(filtro3_tempo(i/rate, B, r))
+
+    # plt.plot(np.linspace(0, (nH-1)/rate, nH), h)
+    # plt.grid(True)
+    # plt.show()
+
+    y = np.convolve(data, h, "same")
+    sd.play(y, rate)
+    sd.wait()
+
 def plot_waveform(rate, data):
     """
     Plot della waveform del segnale audio
@@ -27,6 +51,7 @@ def plot_waveform(rate, data):
         rate: frequenza di campionamento del segnale audio
         data: contenuto del segnale audio
     """
+
     # La durata è il numero di righe (campioni) diviso la frequenza di campionamento
     durata = len(data)/ rate
     
@@ -88,6 +113,7 @@ def calcolo_fft_libreria(segmenti, rate):
     Args:
         segmenti (list): lista di sezioni di M secondi
     """
+
     for i,segmento in enumerate(segmenti):
         start = time()
         fft_segmento = fft.fft(segmento) #calcolo fft del segmento
@@ -96,8 +122,6 @@ def calcolo_fft_libreria(segmenti, rate):
         freq_segmento = fft.fftfreq(len(segmento), d=1/rate) / 1000  #calcolo frequenze 
         ampiezza_segmento = np.abs(fft_segmento) / len(segmento) #calcolo ampiezze
         plot_fft(freq_segmento, ampiezza_segmento, i+1)
-        
-
 
 def main():
     FILENAME = "bohemian_rhapsody.wav" # nome del file audio
@@ -110,7 +134,8 @@ def main():
     rate, data = wav.read(FILENAME)
     
     if data.shape[1] == 2:
-        data = data.mean(axis=1) # converte il segnale stereo in mono
+        #data = data.mean(axis=1) # converte il segnale stereo in mono
+        data = data[:, 0]
 
     # sd.play(data, rate)  # riproduce il file audio
     # sd.wait() # attende la fine esecuzione del file audio
@@ -122,11 +147,11 @@ def main():
     #     sd.play(sezioni[i], rate)
     #     sd.wait()   
 
-    plot_waveform(rate, data)
+    #plot_waveform(rate, data)
     
-    calcolo_fft_libreria(sezioni, rate)
+    #calcolo_fft_libreria(sezioni, rate)
 
-
+    filtro3(rate, data)
     return 0
 
 main()
