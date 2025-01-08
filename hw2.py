@@ -4,6 +4,7 @@ import sounddevice as sd
 import numpy as np
 import matplotlib.pyplot as plt
 from time import time
+from math import sin, pi
 
 def filtraggio_filtro_1(rate, data):
     T = 0.01
@@ -25,7 +26,10 @@ def sinc(t):
     return (sin(pi*t))/(pi*t)
 
 def filtro3_tempo(t, B, r):
-    return 1-sinc((t-r)*2*B)
+    ris = -sinc((t-r)*2*B)
+    if (t == r):
+        ris += 1
+    return ris
 
 def filtro3(rate, data):
     nH = int(5E3)
@@ -38,10 +42,15 @@ def filtro3(rate, data):
     # plt.plot(np.linspace(0, (nH-1)/rate, nH), h)
     # plt.grid(True)
     # plt.show()
-
+    h = np.array(h)
     y = np.convolve(data, h, "same")
-    sd.play(y, rate)
-    sd.wait()
+    # sd.play(y, rate)
+    # sd.wait()
+
+    calcolo_fft_libreria([data],rate)
+    calcolo_fft_libreria([y],rate)
+    
+
 
 def plot_waveform(rate, data):
     """
@@ -124,7 +133,7 @@ def calcolo_fft_libreria(segmenti, rate):
         plot_fft(freq_segmento, ampiezza_segmento, i+1)
 
 def main():
-    FILENAME = "bohemian_rhapsody.wav" # nome del file audio
+    FILENAME = "halleluja.wav" # nome del file audio
     M = 1 # durata in secondi di ogni sezione
 
     # rate è la frequenza di campionamento
@@ -134,8 +143,7 @@ def main():
     rate, data = wav.read(FILENAME)
     
     if data.shape[1] == 2:
-        #data = data.mean(axis=1) # converte il segnale stereo in mono
-        data = data[:, 0]
+        data = np.mean(data, axis=1).astype(data.dtype) # converte il segnale stereo in mono
 
     # sd.play(data, rate)  # riproduce il file audio
     # sd.wait() # attende la fine esecuzione del file audio
