@@ -26,7 +26,7 @@ def sinc(t):
     return (sin(pi*t))/(pi*t)
 
 def filtro3_tempo(t, B, r):
-    ris = -sinc((t-r)*2*B)
+    ris = -2*B*sinc((t-r)*2*B)
     if (t == r):
         ris += 1
     return ris
