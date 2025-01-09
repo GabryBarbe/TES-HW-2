@@ -6,6 +6,41 @@ import matplotlib.pyplot as plt
 from time import time
 from math import sin, pi
 
+def filtro_sinc(B, rate):
+    """
+    Calcolo del filtro sinc nel dominio del tempo
+
+    Args:
+        B: banda del filtro
+        rate: frequenza di camoionamento del segnale audio
+
+    Returns:
+        h: funzione sinc nel dominio del tempo
+    """
+    N=5E3
+    T= N//2
+    t = np.arange(0, N)/rate
+    h = 2*B*np.sinc(2*B*(t-T/rate))
+    # plot_fft(h, rate, "FFT filtro sinc")
+    return h
+
+
+def passa_basso_sinc(rate, data):
+    """
+    Applicazione del filtro passa basso sinc al segnale audio
+
+    Args:
+        rate: frequenza di campionamento del segnale audio
+        data: contenuto del segnale audio
+
+    Returns:
+        y: segnale audio filtrato
+    """
+    B = 1000
+    h = filtro_sinc(B, rate)
+    y = np.convolve(data, h, mode='same')
+    return y
+
 def filtraggio_filtro_1(rate, data):
     T = 0.01
     N = int(rate * T)  #numero di campioni
@@ -49,8 +84,6 @@ def filtro3(rate, data):
 
     calcolo_fft_libreria([data],rate)
     calcolo_fft_libreria([y],rate)
-    
-
 
 def plot_waveform(rate, data):
     """
@@ -71,24 +104,27 @@ def plot_waveform(rate, data):
     plt.grid(True)
     plt.show()  
 
-def plot_fft(freq, ampiezza, num_segmento):
+def plot_fft(segnale, rate, descrizione):
     """
     Plot della FFT del segnale audio
 
     Args:
-        freq: frequenze della FFT
-        ampiezza: ampiezze della FFT
-        num_segmento (integer): numero del segmento
+        segnale: segnale da analizzare
+        rate: frequenza di campionamento del segnale audio
+        descrizione: descrizione del plot
     """
+    fft_segnale = fft.fft(segnale) #calcolo fft del segnale
+    freq = fft.fftfreq(len(segnale), d=1/rate) / 1000  #calcolo frequenze 
+    amp = np.abs(fft_segnale) / len(segnale) #calcolo ampiezze
     
-    plt.plot(freq, ampiezza)
+
+    plt.plot(freq, amp)
     plt.xlabel("Frequenza [kHz]")
     plt.ylabel("Ampiezza [dB]")
-    plt.suptitle("Segmento " + str(num_segmento))
+    plt.suptitle(descrizione)
     plt.title("Spettro di energia")
     plt.grid(True)
     plt.show()
-
 
 def divisione_audio(rate, data, M):
     """
@@ -134,7 +170,6 @@ def calcolo_fft_libreria(segmenti, rate):
 
 def main():
     FILENAME = "halleluja.wav" # nome del file audio
-    M = 1 # durata in secondi di ogni sezione
 
     # rate è la frequenza di campionamento
     # data è una matrice di 2 colonne (perchè il file è stereo) e tante 
@@ -146,20 +181,19 @@ def main():
         data = np.mean(data, axis=1).astype(data.dtype) # converte il segnale stereo in mono
 
     # sd.play(data, rate)  # riproduce il file audio
-    # sd.wait() # attende la fine esecuzione del file audio
-    
-    sezioni = divisione_audio(rate, data, M)
-
-    #riproduzione dei segmenti di M secondi
-    # for i in range(len(sezioni)):
-    #     sd.play(sezioni[i], rate)
-    #     sd.wait()   
+    # sd.wait() # attende la fine esecuzione del file audio  
 
     #plot_waveform(rate, data)
     
-    #calcolo_fft_libreria(sezioni, rate)
+    plot_fft(data, rate, "FFT segnale audio")
 
-    filtro3(rate, data)
+    y = passa_basso_sinc(rate, data)
+
+    # sd.play(y, rate)  # riproduce il file audio
+    # sd.wait() # attende la fine esecuzione del file audio
+    
+    plot_fft(y, rate, "FFT segnale audio filtrato")
+
     return 0
 
 main()
