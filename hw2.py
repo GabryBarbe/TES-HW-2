@@ -40,6 +40,19 @@ def passa_basso_sinc(rate, data):
     y = np.convolve(data, h, mode='same')
     return y
 
+def filtraggio_filtro_1(rate, data):
+    T = 0.01
+    N = int(rate * T)  #numero di campioni
+    h = np.ones(N) / N   #porta discreta di durata T
+    y = np.convolve(data, h)  #convoluzione
+    return y
+
+def filtro1(rate, data):
+    uscita = filtraggio_filtro_1(rate, data)
+    file_output = "output1.wav"
+    wav.write(file_output, rate, np.int16)  #errore da risolvere
+    outrate, outdata = wav.read(file_output)
+    plot_waveform(outrate, outdata)
 
 def plot_waveform(rate, data):
     """
