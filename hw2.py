@@ -6,6 +6,14 @@ import matplotlib.pyplot as plt
 from time import time
 from math import sin, pi
 
+def filtro1(rate, data):
+    T = 0.01
+    N = int(rate * T)  #numero di campioni
+    h = np.ones(N) / N   #porta discreta di durata T
+    h = np.append(h, np.zeros(4*N))
+    y = np.convolve(data, h, "same")  #convoluzione
+    return y
+
 def filtro_sinc(B, rate):
     """
     Calcolo del filtro sinc nel dominio del tempo
@@ -24,8 +32,7 @@ def filtro_sinc(B, rate):
     # plot_fft(h, rate, "FFT filtro sinc")
     return h
 
-
-def passa_basso_sinc(rate, data):
+def filtro2(rate, data):
     """
     Applicazione del filtro passa basso sinc al segnale audio
 
@@ -41,32 +48,29 @@ def passa_basso_sinc(rate, data):
     y = np.convolve(data, h, mode='same')
     return y
 
-def filtraggio_filtro_1(rate, data):
-    T = 0.01
-    N = int(rate * T)  #numero di campioni
-    h = np.ones(N) / N   #porta discreta di durata T
-    y = np.convolve(data, h)  #convoluzione
-    return y
-
-def filtro1(rate, data):
-    uscita = filtraggio_filtro_1(rate, data)
-    file_output = "output1.wav"
-    wav.write(file_output, rate, np.int16)  #errore da risolvere
-    outrate, outdata = wav.read(file_output)
-    plot_waveform(outrate, outdata)
-
-def sinc(t):
-    if (t == 0):
-        return 1
-    return (sin(pi*t))/(pi*t)
-
 def filtro3_tempo(t, B, r):
-    ris = -2*B*sinc((t-r)*2*B)
+    """funzione del filtro
+
+    Args:
+        t: tempo [s]
+        B: Banda [Hz]
+        r: ritardo [s]
+
+    Returns:
+        _type_: _description_
+    """
+    ris = -2*B*np.sinc((t-r)*2*B)
     if (t == r):
         ris += 1
     return ris
 
 def filtro3(rate, data):
+    """funzione generale del filtro 3
+
+    Args:
+        rate: frequenza di campionamento [Hz]
+        data: dati file audio non filtrati
+    """
     nH = int(5E3)
     h = []
     B = 1E3
@@ -81,9 +85,7 @@ def filtro3(rate, data):
     y = np.convolve(data, h, "same")
     # sd.play(y, rate)
     # sd.wait()
-
-    calcolo_fft_libreria([data],rate)
-    calcolo_fft_libreria([y],rate)
+    return y
 
 def plot_waveform(rate, data):
     """
@@ -126,48 +128,6 @@ def plot_fft(segnale, rate, descrizione):
     plt.grid(True)
     plt.show()
 
-def divisione_audio(rate, data, M):
-    """
-    Divisione del segnale audio in sezioni di M secondi
-
-    Args:
-        rate: frequenza di campionamento del segnale audio 
-        data: contenuto del segnale audio
-        M (integer): durata in secondi di ogni sezione
-
-    Returns:
-        sezioni (list): lista di sezioni di M secondi
-    """
-
-    campioni_per_sezione = rate*M # numero di campioni per sezione
-    num_sezioni = (data.shape[0]//campioni_per_sezione) + 1# numero di sezioni
-    
-    sezioni = []
-    for i in range(num_sezioni):
-        inizio = i * campioni_per_sezione # inizio della sezione
-        fine = (i+1) * campioni_per_sezione # fine della sezione
-        sezioni.append(data[inizio:fine]) # aggiungo la sezione 
-
-    return sezioni
-
-
-def calcolo_fft_libreria(segmenti, rate):
-    """
-    Calcolo della FFT del segnale audio con la libreria scipy
-
-    Args:
-        segmenti (list): lista di sezioni di M secondi
-    """
-
-    for i,segmento in enumerate(segmenti):
-        start = time()
-        fft_segmento = fft.fft(segmento) #calcolo fft del segmento
-        stop = time()
-        print("Tempo di esecuzione:", stop-start)
-        freq_segmento = fft.fftfreq(len(segmento), d=1/rate) / 1000  #calcolo frequenze 
-        ampiezza_segmento = np.abs(fft_segmento) / len(segmento) #calcolo ampiezze
-        plot_fft(freq_segmento, ampiezza_segmento, i+1)
-
 def main():
     FILENAME = "halleluja.wav" # nome del file audio
 
@@ -187,8 +147,18 @@ def main():
     
     plot_fft(data, rate, "FFT segnale audio")
 
-    y = passa_basso_sinc(rate, data)
-
+    scelta = int(input("Inserire numero filtro da utilizzare: "))
+    
+    if (scelta == 1):
+        y = filtro1(rate, data)
+    elif (scelta == 2):
+        y = filtro2(rate, data)
+    elif (scelta == 3):
+        y =  filtro3(rate, data)
+    else:
+        print("Nessun filtro con questo numero.")
+        return 1
+    
     # sd.play(y, rate)  # riproduce il file audio
     # sd.wait() # attende la fine esecuzione del file audio
     
