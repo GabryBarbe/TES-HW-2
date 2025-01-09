@@ -5,16 +5,38 @@ import numpy as np
 import matplotlib.pyplot as plt
 from time import time
 
-def passa_basso_sinc(B, rate):
-    N = (4*rate)//B
+def filtro_sinc(B, rate):
+    """
+    Calcolo del filtro sinc nel dominio del tempo
+
+    Args:
+        B: banda del filtro
+        rate: frequenza di camoionamento del segnale audio
+
+    Returns:
+        h: funzione sinc nel dominio del tempo
+    """
+    N=5E3
     T= N//2
     t = np.arange(0, N)/rate
     h = 2*B*np.sinc(2*B*(t-T/rate))
+    # plot_fft(fft.fftfreq(len(h), d=1/rate) / 1000, np.abs(fft.fft(h)) / len(h), 1)
     return h
 
 
-def filtraggio_filtro_sinc(rate, data):
-    h = passa_basso_sinc(1000, rate)
+def passa_basso_sinc(rate, data):
+    """
+    Applicazione del filtro passa basso sinc al segnale audio
+
+    Args:
+        rate: frequenza di campionamento del segnale audio
+        data: contenuto del segnale audio
+
+    Returns:
+        y: segnale audio filtrato
+    """
+    B = 1000
+    h = filtro_sinc(B, rate)
     y = np.convolve(data, h, mode='same')
     return y
 
@@ -100,7 +122,7 @@ def calcolo_fft_libreria(segmenti, rate):
 
 
 def main():
-    FILENAME = "bohemian_rhapsody.wav" # nome del file audio
+    FILENAME = "halleluja.wav" # nome del file audio
     M = 30 # durata in secondi di ogni sezione
 
     # rate è la frequenza di campionamento
@@ -110,7 +132,7 @@ def main():
     rate, data = wav.read(FILENAME)
     
     if data.shape[1] == 2:
-        data = data.mean(axis=1) # converte il segnale stereo in mono
+        data = np.mean(data, axis=1).astype(data.dtype) # converte il segnale stereo in mono
 
     # sd.play(data, rate)  # riproduce il file audio
     # sd.wait() # attende la fine esecuzione del file audio
@@ -122,12 +144,15 @@ def main():
     #     sd.play(sezioni[i], rate)
     #     sd.wait()   
 
-    #plot_waveform(rate, data)
+    plot_waveform(rate, data)
     
     calcolo_fft_libreria(sezioni, rate)
 
-    passa_basso_sinc(1000, rate)
-    y = filtraggio_filtro_sinc(rate, data)
+    y = passa_basso_sinc(rate, data)
+
+    # sd.play(y, rate)  # riproduce il file audio
+    # sd.wait() # attende la fine esecuzione del file audio
+    
     plot_fft(fft.fftfreq(len(y), d=1/rate) / 1000, np.abs(fft.fft(y)) / len(y), 1)
 
 

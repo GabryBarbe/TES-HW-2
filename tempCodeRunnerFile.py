@@ -1,5 +1,2 @@
-plt.plot(x, h)
-    plt.xlabel("Tempo [s]")
-    plt.ylabel("Ampiezza")
-    plt.title("Risposta del filtro passa basso causale")
-    plt.grid(True)
+sd.play(y, rate)  # riproduce il file audio
+    # sd.wait() # attende la fine esecuzione del file audio
