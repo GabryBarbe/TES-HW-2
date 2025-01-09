@@ -54,6 +54,49 @@ def filtro1(rate, data):
     outrate, outdata = wav.read(file_output)
     plot_waveform(outrate, outdata)
 
+def rumore_bianco(rate, durata):
+    """
+    Generazione di rumore bianco gaussiano
+
+    Args:
+        rate: frequenza di campionamento del segnale audio
+        durata: durata del segnale audio
+
+    Returns:
+        n: rumore bianco gaussiano
+    """
+    n = np.random.randn(rate*durata)
+    return n
+
+def funzione_di_trasferimento(rate, uscita, durata):
+    """
+    Calcolo e plot della funzione di trasferimento
+
+    Args:
+        rate: frequenza di campionamento del segnale audio
+        uscita: segnale audio in uscita filtrato
+        durata: durata del file audio
+    """
+    n = rumore_bianco(rate, durata)
+    
+    min_len = min(len(n), len(uscita))
+    n = n[:min_len]
+    uscita = uscita[:min_len]
+
+    fft_ingresso = fft.fft(n)
+    fft_uscita = fft.fft(uscita)
+
+    H = np.abs(fft_uscita) / np.abs(fft_ingresso)
+    freq = fft.fftfreq(len(H), d=1/rate) / 1000  
+
+    plt.plot(freq, H)
+    plt.xlabel("Frequenza [kHz]")
+    plt.ylabel("Ampiezza [dB]")
+    plt.title("Funzione di trasferimento")
+    plt.grid(True)
+    plt.show()
+    return H
+
 def plot_waveform(rate, data):
     """
     Plot della waveform del segnale audio
@@ -98,7 +141,7 @@ def plot_fft(segnale, rate, descrizione):
 
 def main():
     FILENAME = "halleluja.wav" # nome del file audio
-    M = 30 # durata in secondi di ogni sezione
+    M = 30 # durata in secondi del brano audio
 
     # rate è la frequenza di campionamento
     # data è una matrice di 2 colonne (perchè il file è stereo) e tante 
@@ -112,16 +155,18 @@ def main():
     # sd.play(data, rate)  # riproduce il file audio
     # sd.wait() # attende la fine esecuzione del file audio  
 
-    plot_waveform(rate, data)
+    # plot_waveform(rate, data)
     
-    plot_fft(data, rate, "FFT segnale audio")
+    # plot_fft(data, rate, "FFT segnale audio")
 
     y = passa_basso_sinc(rate, data)
 
     # sd.play(y, rate)  # riproduce il file audio
     # sd.wait() # attende la fine esecuzione del file audio
     
-    plot_fft(y, rate, "FFT segnale audio filtrato")
+    # plot_fft(y, rate, "FFT segnale audio filtrato")
+
+    funzione_di_trasferimento(rate, y, M)
 
     return 0
 
