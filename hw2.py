@@ -173,10 +173,6 @@ def plot_fft(segnale, rate, descrizione):
 
 def main():
     FILENAME = "halleluja.wav" # nome del file audio
-<<<<<<< HEAD
-=======
-    M = 30 # durata in secondi del brano audio
->>>>>>> barbe
 
     # rate è la frequenza di campionamento
     # data è una matrice di 2 colonne (perchè il file è stereo) e tante 
@@ -190,11 +186,7 @@ def main():
     # sd.play(data, rate)  # riproduce il file audio
     # sd.wait() # attende la fine esecuzione del file audio  
 
-<<<<<<< HEAD
     #plot_waveform(rate, data)
-=======
-    # plot_waveform(rate, data)
->>>>>>> barbe
     
     # plot_fft(data, rate, "FFT segnale audio")
 
