@@ -65,11 +65,10 @@ def filtro3_h(B, rate):
     h = -h/sum(h)
     h[nH//2] += 1
 
-    plt.plot(np.linspace(0, (nH-1)/rate, nH), h)
-    plt.grid(True)
-    plt.show()
+    # plt.plot(np.linspace(0, (nH-1)/rate, nH), h)
+    # plt.grid(True)
+    # plt.show()
 
-    print(h[nH//2])
     return h
 
 def filtro3(rate, data):
@@ -174,7 +173,7 @@ def plot_fft(segnale, rate, descrizione):
     plt.show()
 
 def main():
-    FILENAME = "halleluja.wav" # nome del file audio
+    FILENAME = "bohemian_rhapsody.wav" # nome del file audio
 
     # rate è la frequenza di campionamento
     # data è una matrice di 2 colonne (perchè il file è stereo) e tante 
@@ -207,9 +206,9 @@ def main():
     # sd.play(y, rate)  # riproduce il file audio
     # sd.wait() # attende la fine esecuzione del file audio
     
-    plot_fft(y, rate, "FFT segnale audio filtrato")
-
-    #funzione_di_trasferimento(rate, y, M)
+    #plot_fft(y, rate, "FFT segnale audio filtrato")
+    M = len(data)/rate
+    funzione_di_trasferimento(rate, y, M)
 
     return 0
 
