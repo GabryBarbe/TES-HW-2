@@ -7,6 +7,16 @@ from time import time
 from math import sin, pi
 
 def filtro1(rate, data):
+    """
+    Funzione per porta nel dominio del tempo
+
+    Args:
+        rate: frequenza di campionamento del segnale audio
+        data: file audio da filtrare
+
+    Returns:
+        y : segnale filtrato
+    """
     T = 0.01
     N = int(rate * T)  #numero di campioni
     h = np.ones(N) / N   #porta discreta di durata T
@@ -29,7 +39,6 @@ def filtro_sinc(B, rate):
     T= N//2
     t = np.arange(0, N)/rate
     h = 2*B*np.sinc(2*B*(t-T/rate))
-    # plot_fft(h, rate, "FFT filtro sinc")
     return h
 
 def filtro2(rate, data):
@@ -49,7 +58,8 @@ def filtro2(rate, data):
     return y
 
 def filtro3_h(B, rate):
-    """funzione del filtro
+    """
+    Calcolo funzione di trasferimento del filtro 3
 
     Args:
         t: tempo [s]
@@ -57,7 +67,7 @@ def filtro3_h(B, rate):
         r: ritardo [s]
 
     Returns:
-        _type_: _description_
+        h: funzione di trasferimento
     """
     nH = int(5E3)
     t = np.arange(0, nH)/rate
@@ -65,14 +75,11 @@ def filtro3_h(B, rate):
     h = -h/sum(h)
     h[nH//2] += 1
 
-    # plt.plot(np.linspace(0, (nH-1)/rate, nH), h)
-    # plt.grid(True)
-    # plt.show()
-
     return h
 
 def filtro3(rate, data):
-    """funzione generale del filtro 3
+    """
+    Applicazione del filtro passa alto al segnale audio
 
     Args:
         rate: frequenza di campionamento [Hz]
@@ -84,8 +91,6 @@ def filtro3(rate, data):
     h = filtro3_h(B, rate)
     
     y = np.convolve(data, h, "same")
-    # sd.play(y, rate)
-    # sd.wait()
     return y
 
 def rumore_bianco(rate, durata):
@@ -174,6 +179,7 @@ def plot_fft(segnale, rate, descrizione):
 
 def main():
     FILENAME = "bohemian_rhapsody.wav" # nome del file audio
+    M=30
 
     # rate è la frequenza di campionamento
     # data è una matrice di 2 colonne (perchè il file è stereo) e tante 
@@ -189,7 +195,7 @@ def main():
 
     #plot_waveform(rate, data)
     
-    #plot_fft(data, rate, "FFT segnale audio")
+    plot_fft(data, rate, "FFT segnale audio")
 
     scelta = int(input("Inserire numero filtro da utilizzare: "))
     
@@ -206,8 +212,8 @@ def main():
     # sd.play(y, rate)  # riproduce il file audio
     # sd.wait() # attende la fine esecuzione del file audio
     
-    #plot_fft(y, rate, "FFT segnale audio filtrato")
-    M = len(data)/rate
+    plot_fft(y, rate, "FFT segnale audio filtrato")
+    
     funzione_di_trasferimento(rate, y, M)
 
     return 0
