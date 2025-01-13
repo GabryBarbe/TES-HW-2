@@ -178,7 +178,7 @@ def plot_fft(segnale, rate, descrizione):
     plt.show()
 
 def main():
-    FILENAME = "bohemian_rhapsody.wav" # nome del file audio
+    FILENAME = "halleluja.wav" # nome del file audio
     M=30
 
     # rate è la frequenza di campionamento
