@@ -48,7 +48,7 @@ def filtro2(rate, data):
     y = np.convolve(data, h, mode='same')
     return y
 
-def filtro3_tempo(t, B, r):
+def filtro3_h(B, rate):
     """funzione del filtro
 
     Args:
@@ -59,10 +59,18 @@ def filtro3_tempo(t, B, r):
     Returns:
         _type_: _description_
     """
-    ris = -2*B*np.sinc((t-r)*2*B)
-    if (t == r):
-        ris += 1
-    return ris
+    nH = int(5E3)
+    t = np.arange(0, nH)/rate
+    h = -2*B*np.sinc(2*B*(t-(nH//2)/rate))
+    h = -h/sum(h)
+    h[nH//2] += 1
+
+    plt.plot(np.linspace(0, (nH-1)/rate, nH), h)
+    plt.grid(True)
+    plt.show()
+
+    print(h[nH//2])
+    return h
 
 def filtro3(rate, data):
     """funzione generale del filtro 3
@@ -71,17 +79,11 @@ def filtro3(rate, data):
         rate: frequenza di campionamento [Hz]
         data: dati file audio non filtrati
     """
-    nH = int(5E3)
-    h = []
+    
+    
     B = 1E3
-    r = nH/(2*rate)
-    for i in range(nH):
-        h.append(filtro3_tempo(i/rate, B, r))
-
-    # plt.plot(np.linspace(0, (nH-1)/rate, nH), h)
-    # plt.grid(True)
-    # plt.show()
-    h = np.array(h)
+    h = filtro3_h(B, rate)
+    
     y = np.convolve(data, h, "same")
     # sd.play(y, rate)
     # sd.wait()
@@ -188,7 +190,7 @@ def main():
 
     #plot_waveform(rate, data)
     
-    # plot_fft(data, rate, "FFT segnale audio")
+    #plot_fft(data, rate, "FFT segnale audio")
 
     scelta = int(input("Inserire numero filtro da utilizzare: "))
     
@@ -205,9 +207,9 @@ def main():
     # sd.play(y, rate)  # riproduce il file audio
     # sd.wait() # attende la fine esecuzione del file audio
     
-    # plot_fft(y, rate, "FFT segnale audio filtrato")
+    plot_fft(y, rate, "FFT segnale audio filtrato")
 
-    funzione_di_trasferimento(rate, y, M)
+    #funzione_di_trasferimento(rate, y, M)
 
     return 0
 
